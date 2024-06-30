@@ -1,17 +1,17 @@
 const pool = require('../config/dbConfig');
 
-// para obtener las joyas
-const getAllJoyas = async () => {
+const getAllJoyas = async (limits, page, order_by) => {
   try {
-    const query = 'SELECT * FROM inventario';
-    const result = await pool.query(query);
+    const offset = (page - 1) * limits;
+    const query = `SELECT * FROM inventario ORDER BY ${order_by.split('_')[0]} ${order_by.split('_')[1]} LIMIT $1 OFFSET $2`;
+    const values = [limits, offset];
+    const result = await pool.query(query, values);
     return result.rows;
   } catch (error) {
     throw new Error(`Error al obtener las joyas: ${error.message}`);
   }
 };
 
-// para dividir segun el precio minimo, maximo, categoria y metales
 const filterJoyas = async (precio_min, precio_max, categoria, metal) => {
   try {
     const query = 'SELECT * FROM inventario WHERE precio >= $1 AND precio <= $2 AND categoria = $3 AND metal = $4';
@@ -23,7 +23,6 @@ const filterJoyas = async (precio_min, precio_max, categoria, metal) => {
   }
 };
 
-// para exportar
 module.exports = {
   getAllJoyas,
   filterJoyas
